@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управління базою даних</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .parent {
+            transform: rotateX(180deg);
+            overflow-x: auto;
+        }
+
+        .child {
+            transform: rotateX(180deg);
+        }
+    </style>
+</head>
+
+<body class="w-100">
+
+    <div class="container mt-5">
+        <h2 class="text-center mb-4">Управління базою даних</h2>
+
+        <!-- Секція для управління таблицями -->
+        <div class="card mb-4">
+            <div class="card-header">Керування таблицями</div>
+            <div class="card-body">
+                <!-- Випадний список для вибору таблиць, які завантажуються при завантаженні сторінки -->
+                <div class="form-group">
+                    <label for="tableSelect">Виберіть таблицю</label>
+                    <select id="tableSelect" class="form-control">
+                        <!-- Опції будуть заповнені скриптом script.js -->
+                    </select>
+                </div>
+                <!-- Перейменування таблиці -->
+                <div class="form-group">
+                    <input type="text" id="newTableName" class="form-control" placeholder="Нова назва таблиці">
+                    <button class="btn btn-warning btn-block mt-2" onclick="renameTable()">Перейменувати
+                        таблицю</button>
+                </div>
+                <!-- Видалення таблиці -->
+                <div class="form-group">
+                    <button class="btn btn-danger btn-block" onclick="deleteTable()">Видалити таблицю</button>
+                </div>
+                <!-- Створення таблиці -->
+                <div class="form-group">
+                    <input type="text" id="createTableName" class="form-control" placeholder="Назва нової таблиці">
+                    <button class="btn btn-success btn-block mt-2" onclick="createTable()">Створити таблицю</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Секція для управління колонками -->
+        <div class="card mb-4">
+            <div class="card-header">Керування колонками</div>
+            <div class="card-body">
+                <!-- Вибір колонок -->
+                <div class="form-group">
+                    <label for="columnSelect">Оберіть колонку</label>
+                    <select id="columnSelect" class="form-control">
+                        <option value="">Оберіть колонку</option>
+                        <!-- Опції будуть заповнені динамічно на основі вибраної таблиці -->
+                    </select>
+                </div>
+                <!-- Перейменування колонки -->
+                <div class="form-group">
+                    <input type="text" id="newColumnName" class="form-control mt-2" placeholder="Нова назва колонки">
+                    <button class="btn btn-warning btn-block mt-2" onclick="renameColumn()">Перейменувати
+                        колонку</button>
+                </div>
+
+                <!-- Видалення колонки -->
+                <div class="form-group">
+                    <button class="btn btn-danger btn-block mt-2" onclick="deleteColumn()">Видалити колонку</button>
+                </div>
+                <!-- Додавання колонки -->
+                <div class="form-group">
+                    <input type="text" id="addColumnName" class="form-control" placeholder="Назва колонки">
+                    <select id="addColumnType" class="form-control mt-2">
+                        <option value="INT">Цілочисельний (INT)</option>
+                        <option value="BIGINT">Великий цілочисельний (BIGINT)</option>
+                        <option value="SMALLINT">Малий цілочисельний (SMALLINT)</option>
+                        <option value="TINYINT">Дуже малий цілочисельний (TINYINT)</option>
+                        <option value="FLOAT">Число з плаваючою крапкою (FLOAT)</option>
+                        <option value="DOUBLE">Подвійна точність (DOUBLE)</option>
+                        <option value="DECIMAL(10,2)">Десяткове число (DECIMAL(10,2))</option>
+                        <option value="NVARCHAR(255)">Рядок (NVARCHAR(255))</option>
+                        <option value="DATE">Дата (DATE)</option>
+                        <option value="BOOLEAN">Логічне значення (BOOLEAN)</option>
+                    </select>
+                    <button class="btn btn-success btn-block mt-2" onclick="addColumn()">Додати колонку</button>
+                </div>
+
+
+            </div>
+        </div>
+
+    </div>
+    <div class="container mt-5 w-100">
+        <h2>Дані таблиці</h2>
+        <!-- Відображення таблиці -->
+        <div class="table-responsive parent">
+            <table id="dataTable" class="table table-bordered child">
+                <thead class="thead-light">
+                    <tr id="tableHeaders">
+                        <!-- Заголовки будуть заповнені динамічно -->
+                    </tr>
+                </thead>
+                <tbody id="tableRows">
+                    <!-- Рядки будуть заповнені динамічно -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="../static/js/script.js"></script>
+</body>
+
+</html>
