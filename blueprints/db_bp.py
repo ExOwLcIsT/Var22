@@ -22,6 +22,8 @@ def get_tables():
         # Закриваємо з'єднання
         mycursor.close()
         # Повертаємо результат як JSON
+        if (request.cookies.get('role') != 'owner'):
+            tables.remove('keys');
         return jsonify(tables)
 
     except mysql.connector.Error as err:
@@ -112,7 +114,7 @@ def get_columns(table_name):
         mycursor = mydb.cursor()
 
         # Query to retrieve column information
-        query = f"SHOW COLUMNS FROM {table_name}"
+        query = f"SHOW COLUMNS FROM `{table_name}`"
         mycursor.execute(query)
         columns = mycursor.fetchall()
         # Format result to include column name and type
@@ -131,17 +133,14 @@ def add_column():
     try:
         table_name = request.json.get('table_name')
         column_name = request.json.get('column_name')
-        column_type = request.json.get('column_type', 'VARCHAR(255)')
-        not_null = request.json.get('not_null', False)
-
+        column_type = request.json.get('column_type', 'NVARCHAR(255)')
+        print(column_type)
         if not table_name or not column_name:
             return jsonify({'error': 'table_name and column_name are required'}), 400
 
-        # Формуємо SQL-запит з опцією NOT NULL, якщо вказано
-        not_null_option = "NOT NULL" if not_null else ""
         add_column_query = f"ALTER TABLE {table_name} ADD COLUMN {
-            column_name} {column_type} {not_null_option}"
-
+            column_name} {column_type}"
+        print(add_column_query)
         mycursor = mydb.cursor()
         mycursor.execute(add_column_query)
         mydb.commit()
@@ -210,7 +209,7 @@ def rename_column():
 @station_bp.route('/get-rows/<table_name>', methods=['GET'])
 def getRows(table_name):
     mycursor = mydb.cursor()
-    mycursor.execute("select * from " + table_name)
+    mycursor.execute("select * from `" + table_name + "`")
     myresult = mycursor.fetchall()
     mycursor.close()
     return jsonify(myresult)
@@ -222,7 +221,7 @@ def add_row(table_name):
     columns = ', '.join(new_row.keys())
     values = list(new_row[key] for key in new_row)  # Use a list comprehension to keep values in their original types
 
-    sql = f"INSERT INTO {table_name} ({columns}) VALUES ({str(values)[1:-1]})"
+    sql = f"INSERT INTO `{table_name}` ({columns}) VALUES ({str(values)[1:-1]})"
     try:
         cursor = mydb.cursor()
         cursor.execute(sql)
@@ -255,13 +254,13 @@ def delete_row(table_name, row_id):
     finally:
         cursor.close()
 
-@station_bp.route('/update-row/<table_name>/<int:row_id>', methods=['PUT'])
+@station_bp.route('/update-row/<table_name>/<row_id>', methods=['PUT'])
 def update_row(table_name, row_id):
     updated_data = request.json
+    print (updated_data)
     set_clause = ', '.join(
         [f"{column} = %s" for column in updated_data.keys()])
-    sql = f"UPDATE {table_name} SET {set_clause} WHERE id = %s"
-
+    sql = f"UPDATE `{table_name}` SET {set_clause} WHERE id = %s"
     try:
         cursor = mydb.cursor()
         cursor.execute(sql, list(updated_data.values()) + [row_id])

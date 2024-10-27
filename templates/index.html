@@ -16,25 +16,44 @@
         .child {
             transform: rotateX(180deg);
         }
+
+        /* Styles for buttons */
+        .top-buttons {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            /* Ensure buttons are above other elements */
+        }
     </style>
 </head>
 
 <body class="w-100">
 
+    <div class="top-buttons">
+        <button class="btn btn-info" onclick="registerUser()">Зареєструвати користувача</button>
+        <button class="btn btn-danger" id="logoutButton" style="display: none;" onclick="logoutUser()">Вийти з
+            акаунта</button>
+    </div>
+
     <div class="container mt-5">
         <h2 class="text-center mb-4">Управління базою даних</h2>
-
-        <!-- Секція для управління таблицями -->
-        <div class="card mb-4">
-            <div class="card-header">Керування таблицями</div>
-            <div class="card-body">
-                <!-- Випадний список для вибору таблиць, які завантажуються при завантаженні сторінки -->
-                <div class="form-group">
+        <div class="container mt-5">
+            <div class="card mb-4">
+                <div class="card-header">Оберіть таблицю для перегляду</div>
+                <div class="card-body">
+                    <!-- Випадний список для вибору таблиць, які завантажуються при завантаженні сторінки -->
                     <label for="tableSelect">Виберіть таблицю</label>
                     <select id="tableSelect" class="form-control">
                         <!-- Опції будуть заповнені скриптом script.js -->
                     </select>
                 </div>
+            </div>
+        </div>
+        <!-- Секція для управління таблицями -->
+        <div class="card mb-4" data-role="owner">
+            <div class="card-header">Керування таблицями</div>
+            <div class="card-body">
                 <!-- Перейменування таблиці -->
                 <div class="form-group">
                     <input type="text" id="newTableName" class="form-control" placeholder="Нова назва таблиці">
@@ -54,7 +73,7 @@
         </div>
 
         <!-- Секція для управління колонками -->
-        <div class="card mb-4">
+        <div class="card mb-4" data-role="admin">
             <div class="card-header">Керування колонками</div>
             <div class="card-body">
                 <!-- Вибір колонок -->
@@ -83,18 +102,15 @@
                         <option value="INT">Цілочисельний (INT)</option>
                         <option value="BIGINT">Великий цілочисельний (BIGINT)</option>
                         <option value="SMALLINT">Малий цілочисельний (SMALLINT)</option>
-                        <option value="TINYINT">Дуже малий цілочисельний (TINYINT)</option>
                         <option value="FLOAT">Число з плаваючою крапкою (FLOAT)</option>
                         <option value="DOUBLE">Подвійна точність (DOUBLE)</option>
                         <option value="DECIMAL(10,2)">Десяткове число (DECIMAL(10,2))</option>
                         <option value="NVARCHAR(255)">Рядок (NVARCHAR(255))</option>
-                        <option value="DATE">Дата (DATE)</option>
-                        <option value="BOOLEAN">Логічне значення (BOOLEAN)</option>
+                        <option value="DATETIME">Дата (DATETIME)</option>
+                        <option value="TINYINT(1)">Логічне значення (TINYINT(1))</option>
                     </select>
                     <button class="btn btn-success btn-block mt-2" onclick="addColumn()">Додати колонку</button>
                 </div>
-
-
             </div>
         </div>
 
@@ -120,6 +136,36 @@
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="../static/js/script.js"></script>
+
+    <script>
+        // Check if 'role' exists in cookies and show/hide logout button
+        function checkUserRole() {
+            const cookies = document.cookie.split('; ');
+            const roleCookie = cookies.find(row => row.startsWith('role='));
+            const logoutButton = document.getElementById('logoutButton');
+
+            if (roleCookie) {
+                logoutButton.style.display = 'block'; // Show logout button
+            } else {
+                logoutButton.style.display = 'none'; // Hide logout button
+            }
+        }
+
+        // Dummy function to register user
+        function registerUser() {
+            location.replace("/logreg")
+        }
+
+        // Dummy function to logout user
+        function logoutUser() {
+            alert('Ви вийшли з акаунта.');
+            document.cookie = 'role=; Max-Age=-99999999;';
+            location.reload();
+        }
+
+        // Call the function to check the user role when the page loads
+        document.addEventListener('DOMContentLoaded', checkUserRole);
+    </script>
 </body>
 
 </html>

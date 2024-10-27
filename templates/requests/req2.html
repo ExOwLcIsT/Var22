@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Дані працівників залізничної станції</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+
+<body class="container mt-5">
+
+    <h2>Перелік працівників залізничної станції</h2>
+    <div class="form-group">
+        <label for="experienceInput">Стаж роботи (в роках, мін):</label>
+        <input type="number" id="experienceMinInput" class="form-control" placeholder="1">
+    </div>
+    <div class="form-group">
+        <label for="experienceMaxInput">Стаж роботи (в роках, макс):</label>
+        <input type="number" id="experienceMaxInput" class="form-control" placeholder="30">
+    </div>
+    <div class="form-group">
+        <label for="genderInput">Стать:</label>
+        <select id="genderInput" class="form-control">
+            <option value="">Усі</option>
+            <option value="1">Чоловіча</option>
+            <option value="0">Жіноча</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="ageMinInput">Вік (мін):</label>
+        <input type="number" id="ageMinInput" class="form-control" placeholder="20">
+    </div>
+    <div class="form-group">
+        <label for="ageMaxInput">Вік (макс):</label>
+        <input type="number" id="ageMaxInput" class="form-control" placeholder="60">
+    </div>
+    <div class="form-group">
+        <label for="childrenInput">Кількість дітей (мін):</label>
+        <input type="number" id="childrenMinInput" class="form-control" placeholder="0">
+    </div>
+    <div class="form-group">
+        <label for="childrenMaxInput">Кількість дітей (макс):</label>
+        <input type="number" id="childrenMaxInput" class="form-control" placeholder="5">
+    </div>
+    <div class="form-group">
+        <label for="salaryMinInput">Заробітна плата (мін):</label>
+        <input type="number" id="salaryMinInput" class="form-control" placeholder="1000">
+    </div>
+    <div class="form-group">
+        <label for="salaryMaxInput">Заробітна плата (макс):</label>
+        <input type="number" id="salaryMaxInput" class="form-control" placeholder="5000">
+    </div>
+    <button class="btn btn-primary" onclick="fetchWorkers()">Отримати дані</button>
+
+    <h3 class="mt-4">Результати</h3>
+    <div id="results"></div>
+
+    <script>
+        async function fetchWorkers() {
+            const experienceMin = document.getElementById('experienceMinInput').value;
+            const experienceMax = document.getElementById('experienceMaxInput').value;
+            const gender = document.getElementById('genderInput').value;
+            const ageMin = document.getElementById('ageMinInput').value;
+            const ageMax = document.getElementById('ageMaxInput').value;
+            const childrenMin = document.getElementById('childrenMinInput').value;
+            const childrenMax = document.getElementById('childrenMaxInput').value;
+            const salaryMin = document.getElementById('salaryMinInput').value;
+            const salaryMax = document.getElementById('salaryMaxInput').value;
+
+            const response = await fetch(
+                `http://127.0.0.1:5000/api/req2?experience_min=${experienceMin}&experience_max=${experienceMax}&gender=${gender}&age_min=${ageMin}&age_max=${ageMax}&children_min=${childrenMin}&children_max=${childrenMax}&salary_min=${salaryMin}&salary_max=${salaryMax}`
+                );
+            const data = await response.json();
+
+            if (!Array.isArray(data) || data.length === 0) {
+                document.getElementById('results').innerHTML = '<p>Дані не знайдено.</p>';
+                return;
+            }
+
+            let output =
+                '<table class="table table-bordered"><thead><tr><th>ПІБ</th><th>Стать</th><th>дата народження</th><th>Кількість дітей</th><th>Заробітна плата</th><th>Стаж роботи</th></tr></thead><tbody>';
+            console.log(data)
+            data.forEach(worker => {
+                output += `<tr>
+                    <td>${worker['ПІБ']}</td>
+                    <td>${worker['стать'] == 1 ? "Чоловіча" : "Жіноча"}</td>
+                    <td>${worker['дата_народження']}</td>
+                    <td>${worker['кількість_дітей']}</td>
+                    <td>${worker["зарплата"]}</td>
+                    <td>${worker['стаж']}</td>
+                </tr>`;
+            });
+
+            output += '</tbody></table>';
+            document.getElementById('results').innerHTML = output;
+        }
+    </script>
+</body>
+
+</html>
