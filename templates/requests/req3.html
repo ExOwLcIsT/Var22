@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Перелік локомотивів</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body class="container mt-5">
+    <h2>Перелік локомотивів на залізничній станції</h2>
+    <div class="form-group">
+        <label for="arrivalTime">Введіть час прибуття:</label>
+        <input type="datetime-local" id="arrivalTime" class="form-control">
+    </div>
+    <div class="form-group">
+        <label for="stationId">Введіть мінімальну кількість маршрутів:</label>
+        <input type="number" id="min_routes" class="form-control" placeholder="мінімальна кількість маршрутів">
+    </div>
+    <button class="btn btn-primary" onclick="fetchLocomotives()">Отримати дані</button>
+
+    <h3 class="mt-4">Результати</h3>
+    <div id="results"></div>
+
+    <script>
+        async function fetchLocomotives() {
+            const arrivalTime = document.getElementById('arrivalTime').value;
+            const min_routes = document.getElementById('min_routes').value;
+
+            const response = await fetch(`http://127.0.0.1:5000/api/req3?arrival_time=${arrivalTime}&min_routes=${min_routes}`);
+            const data = await response.json();
+
+            if (data.error) {
+                document.getElementById('results').innerHTML = `<p>${data.error}</p>`;
+                return;
+            }
+
+            const total = data.total;
+            const locomotives = data.locomotives;
+
+            let output = `<p>Загальна кількість локомотивів: ${total}</p>`;
+            output += `<table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Серійний номер</th>
+                        <th>Модель</th>
+                        <th>Рік виробництва</th>
+                        <th>Кількість маршрутів</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+            console.log(locomotives)
+            locomotives.forEach(locomotive => {
+                output += `<tr>
+                    <td>${locomotive.id}</td>
+                    <td>${locomotive.серійний_номер}</td>
+                    <td>${locomotive.модель}</td>
+                    <td>${locomotive.рік_виробництва}</td>
+                    <td>${locomotive['кількість_маршрутів']}</td>
+                </tr>`;
+            });
+
+            output += '</tbody></table>';
+            document.getElementById('results').innerHTML = output;
+        }
+    </script>
+</body>
+</html>

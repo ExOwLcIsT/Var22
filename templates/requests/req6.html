@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Passengers Information</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script>
+        async function fetchPassengers() {
+            const date = document.getElementById('date').value;
+
+            const response = await fetch(`/api/req6?date=${date}`);
+            const data = await response.json();
+
+            const resultDiv = document.getElementById('result');
+            if (data.error) {
+                resultDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+            } else {
+                let passengerList = '<ul class="list-group">';
+                    console.log(data)
+                data.passengers.forEach(passenger => {
+                    passengerList += `<li class="list-group-item">${passenger[0]} - ${passenger[1] ? 'чоловік' : 'жінка'} - Вік: ${passenger[2]} - Багаж: ${passenger[3] ? 'є' : 'не має'}</li>`;
+                });
+                passengerList += '</ul>';
+                resultDiv.innerHTML = `<h5>Total Passengers: ${data.total_passengers}</h5>` + passengerList;
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">Passengers Information</h1>
+        <div class="form-group">
+            <label for="date">Departure Date:</label>
+            <input type="date" class="form-control" id="date" required>
+        </div>
+        <button class="btn btn-primary" onclick="fetchPassengers()">Get Passengers</button>
+        
+        <h3 class="mt-4">Results:</h3>
+        <div id="result"></div>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

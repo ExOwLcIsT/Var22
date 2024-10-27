@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Техогляди Локомотивів</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+
+<body class="bg-light">
+    <div class="container my-4">
+        <h1 class="text-center mb-4">Техогляди Локомотивів</h1>
+
+        <form id="filterForm" class="row g-3 mb-4">
+            <div class="col-md-6">
+                <label for="start_date" class="form-label">Початкова дата</label>
+                <input type="date" id="start_date" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label for="end_date" class="form-label">Кінцева дата</label>
+                <input type="date" id="end_date" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label for="repair_time" class="form-label">Дата відправлення на ремонт</label>
+                <input type="date" id="repair_time" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label for="repair_count" class="form-label">Кількість ремонтів</label>
+                <input type="number" id="repair_count" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label for="min_routes" class="form-label">Мінімальна кількість рейсів</label>
+                <input type="number" id="min_routes" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label for="min_age" class="form-label">Мінімальний вік локомотива</label>
+                <input type="number" id="min_age" class="form-control" />
+            </div>
+            <div class="col-12 text-center">
+                <button type="submit" class="btn btn-primary">Отримати локомотиви</button>
+            </div>
+        </form>
+
+        <div id="totalCount" class="text-center mb-4 fs-4"></div>
+        <div id="locomotivesList" class="list-group">
+            <table class="table" id="table">
+                <thead>
+                    <th>ID</th>
+                    <th>Серійний номер</th>
+                    <th>Модель</th>
+                    <th>Рік виробництва</th>
+                    <th>Кількість маршрутів</th>
+                    <th>Кількість ремонтів</th>
+                </thead>
+                <tbody id = 'tbody'></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('filterForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const params = new URLSearchParams({
+                start_date: document.getElementById('start_date').value,
+                end_date: document.getElementById('end_date').value,
+                repair_time: document.getElementById('repair_time').value,
+                repair_count: document.getElementById('repair_count').value,
+                min_routes: document.getElementById('min_routes').value,
+                min_age: document.getElementById('min_age').value,
+            });
+
+            try {
+                const response = await fetch(`/api/req4?${params.toString()}`);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                // Відображення результатів
+                document.getElementById('totalCount').textContent =
+                    `Загальна кількість: ${data.totalCount}`;
+                const locomotivesList = document.getElementById('locomotivesList');
+                console.log(data)
+                let table = document.getElementById("tbody");
+                table.innerHTML = '';
+                data.locomotives.forEach(locomotive => {
+                    const tr = document.createElement('tr');
+                    locomotive.forEach(value => {
+                        let td = document.createElement('td');
+                        td.innerText = value;
+                        tr.appendChild(td);
+                    })
+                    table.appendChild(tr);
+                });
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                document.getElementById('totalCount').textContent =
+                    `Помилка при отриманні даних: ${error.message}`;
+            }
+        });
+    </script>
+
+
+</body>
+
+</html>
