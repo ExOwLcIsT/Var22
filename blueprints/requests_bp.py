@@ -178,7 +178,8 @@ def req4():
             end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
         if repair_date != '':
             repair_date = datetime.strptime(repair_date, "%Y-%m-%d").date()
-        print([start_date, end_date, repair_date, min_routes, min_routes, min_age])
+        print([start_date, end_date, repair_date,
+              min_routes, min_routes, min_age])
         query = f'''
                         SELECT Локомотиви.id, Локомотиви.серійний_номер, Локомотиви.модель, Локомотиви.рік_виробництва, COUNT(Техогляди.id) AS кількість_ремонтів
                         FROM Локомотиви
@@ -186,10 +187,10 @@ def req4():
                         WHERE Техогляди.дата_техогляду BETWEEN DATE('{start_date}') AND DATE('{end_date}')
                         AND (DATE('{repair_date}') IS NULL OR DATE(Техогляди.дата_техогляду) = DATE('{repair_date}'))
                         GROUP BY Локомотиви.id
-                        HAVING ({repair_count} IS NULL OR COUNT(Техогляди.id) >= {repair_count}) 
+                        HAVING ({repair_count} IS NULL OR COUNT(Техогляди.id) >= {repair_count})
                         AND ({min_age} IS NULL OR (YEAR(CURDATE())-Локомотиви.рік_виробництва) >= {min_age})
                     '''
-        print (query)
+        print(query)
         cursor.execute(query)
 
         locomotives = cursor.fetchall()
@@ -233,8 +234,10 @@ def get_req5():
         tickets = cursor.fetchall()
         print(tickets)
         # Підрахунок непроданих та зданих квитків
-        unsold_tickets = [ticket for ticket in tickets if ticket[2] == 'booked']
-        returned_tickets = [ticket for ticket in tickets if ticket[2] == 'returned']
+        unsold_tickets = [
+            ticket for ticket in tickets if ticket[2] == 'booked']
+        returned_tickets = [
+            ticket for ticket in tickets if ticket[2] == 'returned']
 
         # Формування відповіді
         response = {
@@ -244,11 +247,11 @@ def get_req5():
         }
 
         return jsonify(response)
-    
+
     except mysql.connector.Error as err:
         print(f"Error: {err}")
         return jsonify({"error": "Database error"}), 500
-    
+
 
 @reqs_bp.route('/req6', methods=['GET'])
 def get_req6():
@@ -283,11 +286,224 @@ def get_req6():
     passengers = cursor.fetchall()
     cursor.close()
     print(passengers)
-    print (len(passengers))
+    print(len(passengers))
     return jsonify({
         'total_passengers': len(passengers),
         'passengers': passengers
     })
 
 
+@reqs_bp.route('/req7', methods=['GET'])
+def get_req7():
+    маршрут_id = request.args.get('маршрут_id', type=int)
+    мін_ціна = request.args.get('мін_ціна', type=float)
+    макс_ціна = request.args.get('макс_ціна', type=float)
 
+    # Підключення до бази даних
+    try:
+        cursor = mydb.cursor()
+
+        cursor.execute('''
+            SELECT 
+                Розклад.номер_поїзда,
+                Розклад.час_відправлення,
+                Розклад.час_прибуття,
+                TIMESTAMPDIFF(MINUTE, Розклад.час_відправлення, Розклад.час_прибуття) AS тривалість,
+                Розклад.ціна_квитка
+            FROM 
+                Розклад
+            JOIN 
+                Маршрути ON Розклад.маршрут_id = Маршрути.id
+            WHERE 
+                Маршрути.id = %s
+                AND Розклад.ціна_квитка BETWEEN %s AND %s
+            ORDER BY 
+                тривалість;
+        ''', (маршрут_id, мін_ціна, макс_ціна))
+
+        trains = cursor.fetchall()
+        total_trains = len(trains)
+
+        return jsonify({
+            'total_trains': total_trains,
+            'trains': trains
+        }), 200
+
+    except Exception as e:
+        print(e)
+        return jsonify({'error': str(e)}), 500
+
+    finally:
+        cursor.close()
+
+
+@reqs_bp.route('/req8', methods=['GET'])
+def get_req8():
+    brigade_id = request.args.get('brigade_id', type=int)
+
+    if brigade_id is None:
+        return jsonify({'error': 'Необхідно вказати id бригади'}), 400
+
+    try:
+        cursor = mydb.cursor()
+
+        # Отримання працівників
+        cursor.execute(f'''
+            SELECT
+                Працівники.id,
+                Працівники.ПІБ,
+                Працівники.стать,
+                Працівники.дата_народження,
+                Працівники.зарплата,
+                Працівники.посада,
+                Бригади.назва AS бригада
+            FROM
+                Працівники
+            JOIN
+                Бригади ON Працівники.бригада_id = Бригади.id
+            WHERE
+                Бригади.id = {brigade_id};
+        ''')
+        workers = cursor.fetchall()
+
+        # Отримання загальної кількості та середньої зарплати
+        cursor.execute(f'''
+            SELECT
+                COUNT(*) AS total_workers,
+                AVG(зарплата) AS average_salary
+            FROM
+                Працівники
+            WHERE
+                бригада_id = {brigade_id};
+        ''')
+        stats = cursor.fetchone()
+        print(stats)
+        return jsonify({
+            'total_workers': stats[0],
+            'average_salary': stats[1],
+            'workers': workers
+        }), 200
+
+    except Exception as e:
+        print(e)
+        return jsonify({'error': str(e)}), 500
+
+    finally:
+        cursor.close()
+
+
+@reqs_bp.route('/req9', methods=['GET'])
+def get_req9():
+    route_id = request.args.get('route_id', type=int)
+    delay_reason = request.args.get('delay_reason', type=str)
+
+    if route_id is None:
+        return jsonify({'error': 'Необхідно вказати id маршруту'}), 400
+
+    try:
+        cursor = mydb.cursor()
+
+        # Get canceled trips for the specified route
+        cursor.execute(f'''
+            SELECT
+                COUNT(*) AS total_canceled,
+                GROUP_CONCAT(номер_поїзда) AS canceled_trains
+            FROM
+                Розклад
+            WHERE
+                маршрут_id = {route_id} AND статус = 'canceled';
+        ''')
+        canceled_trips = cursor.fetchone()
+
+        # Get delayed trips for the specified route and reason
+        cursor.execute(f'''
+            SELECT
+                COUNT(*) AS total_delayed,
+                GROUP_CONCAT(номер_поїзда) AS delayed_trains,
+                COUNT(Квитки.id) AS total_refunded_tickets
+            FROM
+                Розклад
+            LEFT JOIN
+                Квитки ON Розклад.id = Квитки.розклад_id
+            WHERE
+                маршрут_id = {route_id} AND статус = 'delayed'
+                AND (причина_затримки = '{delay_reason}' OR '{delay_reason}' IS NULL);
+        ''')
+        delayed_trips = cursor.fetchone()
+
+        return jsonify({
+            'canceled_trips': canceled_trips,
+            'delayed_trips': delayed_trips
+        }), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+    finally:
+        cursor.close()
+
+
+@reqs_bp.route('/req10', methods=['GET'])
+def get_ticket_sales():
+    try:
+        # Get parameters from the query string
+        start_date = request.args.get('start_date')  # Expected format: YYYY-MM-DD
+        end_date = request.args.get('end_date')      # Expected format: YYYY-MM-DD
+        # Route ID to filter by
+        route_id = request.args.get('route_id', type=int)
+
+        # Validate the input dates
+        try:
+            print(start_date)
+            print(end_date)
+            start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+            end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+        except ValueError:
+            return jsonify({"error": "Invalid date format. Use YYYY-MM-DD."}), 400
+
+        cursor = mydb.cursor()
+
+        # Query to get the list and average of tickets sold
+        query = f"""
+        SELECT 
+            Розклад.номер_поїзда,
+            COUNT(Квитки.id) AS total_sold,
+            AVG(Розклад.ціна_квитка) AS average_price
+        FROM 
+            Квитки
+        JOIN 
+            Розклад ON Квитки.розклад_id = Розклад.id
+        WHERE 
+            Розклад.час_відправлення BETWEEN DATE('{start_date}') AND DATE('{end_date}')
+            AND Розклад.маршрут_id = {route_id}
+        GROUP BY 
+            Розклад.номер_поїзда;
+        """
+        print(query)
+        cursor.execute(query)
+        results = cursor.fetchall()
+
+        cursor.close()
+
+        return jsonify(results), 200
+    except Exception  as ex:
+        print(ex)
+        return jsonify({"message": "Error"}), 400
+
+
+@reqs_bp.route('/queries', methods=['GET', 'POST'])
+def query():
+    cursor = mydb.cursor()
+    
+    query_data = request.json.get('query')
+    if not query_data:
+        return jsonify({"error": "Query text is required"}), 400
+        
+    try:
+        cursor.execute(query_data)
+        result = cursor.fetchall()
+        return jsonify(result), 200
+    except Exception as e:
+            return jsonify({"error": str(e)}), 500
+    finally:
+            cursor.close()

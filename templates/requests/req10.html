@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title>Ticket Sales Report</title>
+</head>
+
+<body>
+    <div class="container mt-5">
+        <h1>Отримати звіт з продажу квитків</h1>
+        <form id="ticketSalesForm">
+            <div class="form-group">
+                <label for="start_date">Дата початку:</label>
+                <input type="date" class="form-control" id="start_date" required>
+            </div>
+            <div class="form-group">
+                <label for="end_date">Дата закінчення:</label>
+                <input type="date" class="form-control" id="end_date" required>
+            </div>
+            <div class="form-group">
+                <label for="route_id">ID маршруту:</label>
+                <input type="number" class="form-control" id="route_id" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Отримати дані</button>
+        </form>
+        <h2 class="mt-5">Результати:</h2>
+        <pre id="result"></pre>
+    </div>
+
+    <script>
+        document.getElementById('ticketSalesForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const startDate = document.getElementById('start_date').value;
+            const endDate = document.getElementById('end_date').value;
+            const routeId = document.getElementById('route_id').value;
+
+            fetch(`/api/req10?start_date=${startDate}&end_date=${endDate}&route_id=${routeId}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data)
+                    const resultContainer = document.getElementById('result');
+
+                    // Очистити попередній вміст
+                    resultContainer.innerHTML = '';
+
+                    // Створити таблицю
+                    const table = document.createElement('table');
+                    table.classList.add('table', 'table-striped',
+                    'table-bordered'); // Класи Bootstrap для стилю таблиці (за потреби)
+
+                    // Створити заголовок таблиці
+                    const headerRow = document.createElement('tr');
+                    const headers = ['Train Number', 'Total Sold Tickets',
+                        'Average Ticket Price'
+                    ];
+                    headers.forEach(headerText => {
+                        const th = document.createElement('th');
+                        th.textContent = headerText;
+                        headerRow.appendChild(th);
+                    });
+                    table.appendChild(headerRow);
+
+                    // Додати дані у таблицю
+                    data.forEach(item => {
+                        const row = document.createElement('tr');
+
+                        const trainNumberCell = document.createElement('td');
+                        trainNumberCell.textContent = item[0];
+                        row.appendChild(trainNumberCell);
+
+                        const departureTimeCell = document.createElement('td');
+                        departureTimeCell.textContent = item[1] 
+                            .toLocaleString();
+                        row.appendChild(departureTimeCell);
+
+                        const averagePriceCell = document.createElement('td');
+                        averagePriceCell.textContent = parseFloat(item[2]).toFixed(2);
+                        row.appendChild(averagePriceCell);
+
+                        table.appendChild(row);
+                    });
+
+                    // Додати таблицю в контейнер результатів
+                    resultContainer.appendChild(table);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Працівники</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1 class="mt-5">Знайти працівників у бригаді</h1>
+        <form id="workersForm">
+            <div class="form-group">
+                <label for="brigade_id">ID Бригади</label>
+                <input type="number" class="form-control" id="brigade_id" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Знайти</button>
+        </form>
+
+        <div id="result" class="mt-4"></div>
+    </div>
+
+    <script>
+        document.getElementById('workersForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const brigade_id = document.getElementById('brigade_id').value;
+
+            fetch(`/api/req8?brigade_id=${brigade_id}`)
+                .then(response => response.json())
+                .then(data => {
+                    const resultDiv = document.getElementById('result');
+                    console.log(data)
+                    if (data.error) {
+                        resultDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                    } else {
+                        resultDiv.innerHTML = `<h3>Знайдено працівників: ${data.total_workers}</h3>
+                                              <h4>Середня зарплата: ${parseFloat(data.average_salary).toFixed(2)} грн</h4>`;
+                        let table = '<table class="table"><thead><tr><th>ID</th><th>ПІБ</th><th>Стать</th><th>Дата народження</th><th>Зарплата</th><th>Посада</th><th>Бригада</th></tr></thead><tbody>';
+                       
+                            data.workers.forEach(worker => {
+                            table += `<tr>
+                                <td>${worker[0]}</td>
+                                <td>${worker[1]}</td>
+                                <td>${worker[2] ? 'Чоловіча' : 'Жіноча'}</td>
+                                <td>${new Date(worker[3]).toLocaleDateString('uk-UA')}</td>
+                                <td>${worker[4]}</td>
+                                <td>${worker[5]}</td>
+                                <td>${worker[6]}</td>
+                            </tr>`;
+                        });
+                        table += '</tbody></table>';
+                        resultDiv.innerHTML += table;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        });
+    </script>
+</body>
+</html>

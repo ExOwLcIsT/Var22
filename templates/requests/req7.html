@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Поїзди</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1 class="mt-5">Знайти поїзди</h1>
+        <form id="trainForm">
+            <div class="form-group">
+                <label for="маршрут_id">Маршрут ID</label>
+                <input type="number" class="form-control" id="маршрут_id" required>
+            </div>
+            <div class="form-group">
+                <label for="мін_ціна">Мінімальна ціна</label>
+                <input type="number" class="form-control" id="мін_ціна" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label for="макс_ціна">Максимальна ціна</label>
+                <input type="number" class="form-control" id="макс_ціна" step="0.01" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Знайти</button>
+        </form>
+
+        <div id="result" class="mt-4"></div>
+    </div>
+
+    <script>
+        document.getElementById('trainForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const маршрут_id = document.getElementById('маршрут_id').value;
+            const мін_ціна = document.getElementById('мін_ціна').value;
+            const макс_ціна = document.getElementById('макс_ціна').value;
+
+            fetch(`/api/req7?маршрут_id=${маршрут_id}&мін_ціна=${мін_ціна}&макс_ціна=${макс_ціна}`)
+                .then(response => response.json())
+                .then(data => {
+                    const resultDiv = document.getElementById('result');
+                    resultDiv.innerHTML = `<h3>Знайдено поїздів: ${data.total_trains}</h3>`;
+                    let table = '<table class="table"><thead><tr><th>Номер поїзда</th><th>Час відправлення</th><th>Час прибуття</th><th>Тривалість (хв)</th><th>Ціна (грн)</th></tr></thead><tbody>';
+                    data.trains.forEach(train => {
+                        table += `<tr>
+                            <td>${train[0]}</td>
+                            <td>${train[1]}</td>
+                            <td>${train[2]}</td>
+                            <td>${train[3]}</td>
+                            <td>${train[4]}</td>
+                        </tr>`;
+                    });
+                    table += '</tbody></table>';
+                    resultDiv.innerHTML += table;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        });
+    </script>
+</body>
+</html>

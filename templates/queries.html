@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Запити</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+
+<body class="container mt-5">
+
+    <h2 class="text-center">Запити</h2>
+
+    <!-- Кнопки для запитів -->
+    <div class="d-flex flex-wrap justify-content-center my-4">
+        <button class="btn btn-secondary m-2" onclick="executePredefinedQuery(1)">Запит 1</button>
+        <button class="btn btn-secondary m-2" onclick="executePredefinedQuery(2)">Запит 2</button>
+        <button class="btn btn-secondary m-2" onclick="executePredefinedQuery(3)">Запит 3</button>
+        <button class="btn btn-secondary m-2" onclick="executePredefinedQuery(4)">Запит 4</button>
+        <button class="btn btn-secondary m-2" onclick="executePredefinedQuery(5)">Запит 5</button>
+        <button class="btn btn-secondary m-2" onclick="executePredefinedQuery(6)">Запит 6</button>
+        <button class="btn btn-secondary m-2" onclick="executePredefinedQuery(7)">Запит 7</button>
+        <button class="btn btn-secondary m-2" onclick="executePredefinedQuery(8)">Запит 8</button>
+        <button class="btn btn-secondary m-2" onclick="executePredefinedQuery(9)">Запит 9</button>
+        <button class="btn btn-secondary m-2" onclick="executePredefinedQuery(10)">Запит 10</button>
+    </div>
+
+    <!-- Поле для введення власного SQL-запиту -->
+    <div class="form-group">
+        <label for="customQuery">Введіть власний SQL-запит:</label>
+        <textarea id="customQuery" class="form-control" rows="3" placeholder="SELECT * FROM Таблиця"></textarea>
+    </div>
+    <button class="btn btn-primary mt-2" onclick="executeCustomQuery()">Виконати запит</button>
+
+    <!-- Відображення результатів -->
+    <div class="mt-4">
+        <h4>Результати:</h4>
+        <pre id="queryResults"></pre>
+    </div>
+
+    <script>
+        // Виконання попередньо визначеного запиту
+        function executePredefinedQuery(queryNumber) {
+            location.replace(`/req${queryNumber}`);
+        }
+
+        // Виконання користувацького SQL-запиту
+        function executeCustomQuery() {
+            const customQuery = document.getElementById('customQuery').value;
+            fetch('/api/queries', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query: customQuery })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('queryResults').textContent = JSON.stringify(data, null, 2);
+                })
+                .catch(error => console.error('Помилка:', error));
+        }
+    </script>
+</body>
+
+</html>

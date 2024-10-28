@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <title>Отримати дані про рейси</title>
+</head>
+
+<body>
+
+    <div class="container mt-5">
+        <h2 class="text-center">Отримати дані про рейси</h2>
+
+        <form id="tripForm" class="mt-4">
+            <div class="form-group">
+                <label for="route_id">ID маршруту:</label>
+                <input type="number" class="form-control" id="route_id" required>
+            </div>
+
+            <div class="form-group">
+                <label for="delay_reason">Причина затримки (необов'язково):</label>
+                <input type="text" class="form-control" id="delay_reason">
+            </div>
+
+            <button type="submit" class="btn btn-primary">Отримати дані</button>
+        </form>
+
+        <div id="result" class="mt-4"></div>
+    </div>
+
+    <script>
+        document.getElementById('tripForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const routeId = document.getElementById('route_id').value;
+            const delayReason = document.getElementById('delay_reason').value;
+
+            fetch(`/api/req9?route_id=${routeId}&delay_reason=${delayReason}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data)
+                    const resultDiv = document.getElementById('result');
+                    resultDiv.innerHTML = ''; // Clear previous results
+
+                    if (data.error) {
+                        resultDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                    } else {
+                        resultDiv.innerHTML = `
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Скасовані рейси</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">Загальна кількість: ${data.canceled_trips[0]}</h6>
+                            <p>Номери поїздів: ${data.canceled_trips[1]}</p>
+                        </div>
+                    </div>
+                    <div class="card mt-3">
+                        <div class="card-body">
+                            <h5 class="card-title">Затримані рейси</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">Загальна кількість: ${data.delayed_trips[0]}</h6>
+                            <p>Номери поїздів: ${data.delayed_trips[1]}</p>
+                            <p>Кількість зданих квитків: ${data.delayed_trips[2]}</p>
+                        </div>
+                    </div>
+                `;
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        });
+    </script>
+
+    <!-- Bootstrap JS, Popper.js, and jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</body>
+
+</html>

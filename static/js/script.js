@@ -25,7 +25,7 @@ function hideRoles() {
 
 document.addEventListener("DOMContentLoaded", () => {
     loadTableOptions(); // Завантажуємо доступні таблиці
-    document.getElementById('tableSelect').addEventListener('change', loadTableData);    
+    document.getElementById('tableSelect').addEventListener('change', loadTableData);
     hideRoles();
 });
 
@@ -502,4 +502,8 @@ async function loadTables() {
     } catch (error) {
         console.error('Помилка завантаження таблиць:', error);
     }
+}
+
+function goToQueriesPage() {
+    window.location.href = "/queries";
 }

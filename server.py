@@ -34,50 +34,75 @@ def get_req1():
     return render_template(
         "requests/req1.html"
     )
+
+
 @app.route('/req2', methods=['GET'])
 def get_req2():
     return render_template(
         "requests/req2.html"
     )
+
+
 @app.route('/req3', methods=['GET'])
 def get_req3():
     return render_template(
         "requests/req3.html"
     )
+
+
 @app.route('/req4', methods=['GET'])
 def get_req4():
     return render_template(
         "requests/req4.html"
     )
+
+
 @app.route('/req5', methods=['GET'])
 def get_req5():
     return render_template(
         "requests/req5.html"
     )
+
+
 @app.route('/req6', methods=['GET'])
 def get_req6():
     return render_template(
         "requests/req6.html"
     )
+
+
 @app.route('/req7', methods=['GET'])
 def get_req7():
     return render_template(
         "requests/req7.html"
     )
+
+
 @app.route('/req8', methods=['GET'])
 def get_req8():
     return render_template(
         "requests/req8.html"
     )
+
+
 @app.route('/req9', methods=['GET'])
 def get_req9():
     return render_template(
         "requests/req9.html"
     )
+
+
 @app.route('/req10', methods=['GET'])
 def get_req10():
     return render_template(
         "requests/req10.html"
+    )
+
+
+@app.route('/queries', methods=['GET'])
+def get_queries():
+    return render_template(
+        "queries.html"
     )
 
 
